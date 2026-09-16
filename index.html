@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14120F;
+    --panel:#1E1A15;
+    --panel-line:#332C24;
+    --bone:#EDE7DD;
+    --bone-dim:#A79E8F;
+    --oxblood:#8C2C36;
+    --oxblood-bright:#C4444F;
+    --sage:#8A9A79;
+    --sage-bright:#A9BC96;
+    --gold:#C9A24B;
+    --danger:#C4444F;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--bone);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .cabinet{
+    width:100%;
+    max-width:440px;
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    padding:24px 20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cabinet::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:3px;
+    background:linear-gradient(90deg, var(--oxblood), var(--sage), var(--gold));
+  }
+  h1{
+    font-family:'Rajdhani',sans-serif;
+    font-weight:700;
+    font-size:28px;
+    letter-spacing:0.5px;
+    margin:4px 0 2px;
+  }
+  .sub{
+    color:var(--bone-dim);
+    font-size:13px;
+    margin-bottom:22px;
+    line-height:1.5;
+  }
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  .player-grid{display:flex; gap:12px; margin-top:16px;}
+  .player-card{
+    flex:1;
+    background:#25201A;
+    border:1px solid var(--panel-line);
+    border-radius:var(--radius);
+    padding:18px 14px;
+    text-align:left;
+    cursor:pointer;
+    transition:border-color .15s ease, transform .1s ease;
+    font-family:inherit;
+    color:var(--bone);
+  }
+  .player-card:active{transform:scale(0.97);}
+  .player-card.beau{border-left:3px solid var(--oxblood-bright);}
+  .player-card.rhys{border-left:3px solid var(--sage-bright);}
+  .player-card .name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px;}
+  .player-card .meta{font-size:12px; color:var(--bone-dim); margin-top:6px;}
+
+  .link-row{margin-top:20px; text-align:center;}
+  .link-btn{background:none; border:none; color:var(--bone-dim); font-size:13px; text-decoration:underline; cursor:pointer; font-family:'Inter',sans-serif;}
+
+  .countdown-num{font-family:'Rajdhani',sans-serif; font-size:96px; font-weight:700; text-align:center; color:var(--gold); padding:40px 0;}
+
+  .hud{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; font-family:'Rajdhani',sans-serif;}
+  .hud .timer{font-size:30px; font-weight:700;}
+  .hud .timer.low{color:var(--danger);}
+  .hud .progress-label{font-size:18px; font-weight:700; color:var(--gold);}
+  .lives{display:flex; gap:5px;}
+  .life-dot{width:12px; height:12px; border-radius:50%; background:var(--oxblood-bright);}
+  .life-dot.spent{background:#3A322A;}
+
+  .boost-track{height:6px; background:#3A322A; border-radius:3px; margin-bottom:20px; overflow:hidden;}
+  .boost-fill{height:100%; background:linear-gradient(90deg, var(--sage), var(--gold)); width:0%; transition:width .25s ease;}
+
+  .question-box{background:#25201A; border-radius:var(--radius); padding:32px 16px; text-align:center; margin-bottom:18px;}
+  .question-text{font-family:'Rajdhani',sans-serif; font-size:44px; font-weight:700; letter-spacing:1px;}
+  .answer-display{min-height:28px; font-family:'Rajdhani',sans-serif; font-size:22px; color:var(--gold); margin-top:10px; letter-spacing:2px;}
+
+  .keypad{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;}
+  .key{background:#25201A; border:1px solid var(--panel-line); color:var(--bone); font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:600; padding:16px 0; border-radius:8px; cursor:pointer;}
+  .key:active{background:#332C24;}
+  .key.submit{background:var(--sage); color:#14120F; border:none;}
+  .key.clear{background:transparent; color:var(--bone-dim);}
+
+  .feedback-flash{position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .12s ease;}
+  .feedback-flash.correct{background:rgba(138,154,121,0.18); opacity:1;}
+  .feedback-flash.wrong{background:rgba(196,68,79,0.2); opacity:1;}
+
+  .summary-stat-row{display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--panel-line); font-size:14px;}
+  .summary-stat-row .val{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; color:var(--gold);}
+  .ore-row{display:flex; gap:14px; margin-top:16px; flex-wrap:wrap;}
+  .ore-chip{background:#25201A; border-radius:8px; padding:8px 12px; font-size:13px; display:flex; align-items:center; gap:6px;}
+
+  .primary-btn{width:100%; background:var(--oxblood); color:var(--bone); border:none; border-radius:8px; padding:14px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; margin-top:18px; cursor:pointer;}
+  .primary-btn.boss{background:var(--gold); color:#14120F;}
+  .primary-btn:disabled{background:#3A322A; color:var(--bone-dim); cursor:default;}
+  .secondary-btn{width:100%; background:none; border:1px solid var(--panel-line); color:var(--bone-dim); border-radius:8px; padding:12px; font-family:'Inter',sans-serif; font-size:14px; margin-top:10px; cursor:pointer;}
+
+  .lb-card{background:#25201A; border-radius:var(--radius); padding:16px; margin-bottom:12px;}
+  .lb-card .lb-name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px;}
+  .lb-card.beau{border-left:3px solid var(--oxblood-bright);}
+  .lb-card.rhys{border-left:3px solid var(--sage-bright);}
+  .lb-stats{display:flex; justify-content:space-between; margin-top:10px;}
+  .lb-stat{text-align:center;}
+  .lb-stat .n{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px; display:block;}
+  .lb-stat .l{font-size:11px; color:var(--bone-dim);}
+  .base-bar{height:8px; background:#3A322A; border-radius:4px; margin-top:10px; overflow:hidden;}
+  .base-fill{height:100%; background:var(--gold);}
+
+  .loading-line{color:var(--bone-dim); font-size:13px; text-align:center; padding:20px 0;}
+
+  /* Map screen */
+  .arc-header{background:#25201A; border-radius:var(--radius); padding:16px; margin-bottom:16px;}
+  .arc-header .arc-num{font-size:11px; color:var(--bone-dim);}
+  .arc-header .arc-name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px; margin-top:2px;}
+  .arc-header .arc-title{font-size:12px; color:var(--gold); margin-top:4px;}
+
+  .arc-list{list-style:none; padding:0; margin:0 0 16px;}
+  .arc-list li{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 4px; border-bottom:1px solid var(--panel-line);
+    font-size:13px; color:var(--bone-dim);
+  }
+  .arc-list li.current{color:var(--bone); font-weight:600;}
+  .arc-list li.cleared{color:var(--sage-bright);}
+  .arc-dot{width:8px; height:8px; border-radius:50%; background:#3A322A; flex-shrink:0;}
+  .arc-list li.cleared .arc-dot{background:var(--sage-bright);}
+  .arc-list li.current .arc-dot{background:var(--gold);}
+
+  .teachback-box{background:#25201A; border-radius:var(--radius); padding:20px; text-align:center; margin:20px 0;}
+  .teachback-box .big-icon{font-size:36px; margin-bottom:8px;}
+  .boss-banner{background:linear-gradient(90deg, rgba(140,44,54,0.25), rgba(201,162,75,0.15)); border:1px solid var(--gold); border-radius:var(--radius); padding:16px; text-align:center; margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<div class="cabinet">
+  <div class="feedback-flash" id="flash"></div>
+
+  <!-- PLAYER SELECT -->
+  <div class="screen active" id="screen-select">
+    <h1>Math Arena</h1>
+    <div class="sub">Pick your player. Every Arc ends in a Boss Battle — but you have to teach it back before you can fight.</div>
+    <div class="player-grid">
+      <button class="player-card beau" onclick="startPlayer('beau')">
+        <div class="name">Beau</div>
+        <div class="meta">3rd grade tier</div>
+      </button>
+      <button class="player-card rhys" onclick="startPlayer('rhys')">
+        <div class="name">Rhys</div>
+        <div class="meta">1st grade tier</div>
+      </button>
+    </div>
+    <div class="link-row">
+      <button class="link-btn" onclick="showLeaderboard()">View leaderboard →</button>
+    </div>
+  </div>
+
+  <!-- ARC MAP -->
+  <div class="screen" id="screen-map">
+    <h1 id="map-player-name">—</h1>
+    <div class="sub">Your journey so far.</div>
+    <div class="arc-header">
+      <div class="arc-num" id="map-arc-num">ARC —</div>
+      <div class="arc-name" id="map-arc-name">—</div>
+      <div class="arc-title" id="map-title">—</div>
+    </div>
+    <ul class="arc-list" id="arc-list"></ul>
+
+    <button class="primary-btn" id="btn-practice" onclick="startPractice()">Practice this Arc</button>
+
+    <div id="teachback-gate"></div>
+
+    <button class="secondary-btn" onclick="showLeaderboard()">View leaderboard</button>
+    <button class="secondary-btn" onclick="showSelect()">Switch player</button>
+  </div>
+
+  <!-- TEACH-BACK CONFIRM -->
+  <div class="screen" id="screen-teachback">
+    <h1>Teach It Back</h1>
+    <div class="sub">Before the Boss Battle unlocks, explain one problem from this Arc out loud — to a parent, a brother, or the camera. Once they've heard it, confirm below.</div>
+    <div class="teachback-box">
+      <div class="big-icon">🗣️</div>
+      <div id="teachback-arc-name">—</div>
+    </div>
+    <button class="primary-btn boss" onclick="confirmTeachBack()">Confirm — they taught it back</button>
+    <button class="secondary-btn" onclick="showMap()">Not yet</button>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="screen" id="screen-countdown">
+    <div class="sub" style="text-align:center; margin-bottom:0;" id="countdown-label">GET READY</div>
+    <div class="countdown-num" id="countdown-num">3</div>
+  </div>
+
+  <!-- PLAY -->
+  <div class="screen" id="screen-play">
+    <div class="boss-banner" id="boss-banner" style="display:none;">BOSS BATTLE — 8 of 10 to clear the Arc</div>
+    <div class="hud">
+      <div class="timer" id="timer">60</div>
+      <div class="progress-label" id="progress-label" style="display:none;"></div>
+      <div class="lives" id="lives"></div>
+    </div>
+    <div class="boost-track" id="boost-track"><div class="boost-fill" id="boost-fill"></div></div>
+    <div class="question-box">
+      <div class="question-text" id="question-text">--</div>
+      <div class="answer-display" id="answer-display">&nbsp;</div>
+    </div>
+    <div class="keypad" id="keypad"></div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="screen" id="screen-summary">
+    <h1 id="summary-title">Round Over</h1>
+    <div class="sub" id="summary-sub">Nice run.</div>
+    <div class="summary-stat-row"><span>Score</span><span class="val" id="s-score">0</span></div>
+    <div class="summary-stat-row"><span>Correct answers</span><span class="val" id="s-correct">0</span></div>
+    <div class="summary-stat-row"><span>Best streak</span><span class="val" id="s-streak">0</span></div>
+    <div class="summary-stat-row"><span>Personal best</span><span class="val" id="s-best">0</span></div>
+    <div class="ore-row" id="ore-row"></div>
+    <button class="primary-btn" onclick="playAgain()">Play again</button>
+    <button class="secondary-btn" onclick="showMap()">Back to Arc map</button>
+    <button class="secondary-btn" onclick="showLeaderboard()">View leaderboard</button>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="screen" id="screen-leaderboard">
+    <h1>Leaderboard</h1>
+    <div class="sub">Separate devices, same scoreboard. Whoever's built more wins the week.</div>
+    <div id="lb-content"><div class="loading-line">Loading scores…</div></div>
+    <button class="secondary-btn" onclick="showSelect()">← Back</button>
+  </div>
+</div>
+
+<script>
+/* ---------- Config ---------- */
+const PLAYERS = {
+  beau: { label: 'Beau', tier: '3rd grade', class: 'beau' },
+  rhys: { label: 'Rhys', tier: '1st grade', class: 'rhys' }
+};
+const ORE_META = {
+  wood:    { label: 'Wood',    icon: '🪵' },
+  stone:   { label: 'Stone',   icon: '⛏️' },
+  iron:    { label: 'Iron',    icon: '🔩' },
+  diamond: { label: 'Diamond', icon: '💎' }
+};
+const ROUND_SECONDS = 60;
+const START_LIVES = 3;
+const BASE_LEVEL_XP = 250;
+const BOSS_QUESTION_COUNT = 10;
+const BOSS_PASS_THRESHOLD = 8;
+
+// TODO — replace these once the boys name their world and each Arc.
+// One entry per Arc (1 through 5).
+const ARC_NAMES = [
+  'Arc I — name it',
+  'Arc II — name it',
+  'Arc III — name it',
+  'Arc IV — name it',
+  'Arc V — name it'
+];
+const TITLES = ['Apprentice', 'Journeyman', 'Smith', 'Master Smith', 'Kingdom Smith', 'Saga Champion'];
+
+/* ---------- Problem generators ---------- */
+function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function genRhys(tier){
+  const r = Math.random();
+  if(tier <= 1){
+    const a = randInt(1,7), b = randInt(1, 10-a);
+    return { text:`${a} + ${b}`, answer:a+b, op:'add' };
+  }
+  if(tier === 2){
+    if(r < 0.5){ const a=randInt(5,15), b=randInt(1,20-a); return {text:`${a} + ${b}`, answer:a+b, op:'add'}; }
+    const a=randInt(2,10), b=randInt(1,a); return {text:`${a} - ${b}`, answer:a-b, op:'sub'};
+  }
+  if(tier === 3){
+    if(r < 0.5){ const a=randInt(10,20), b=randInt(1,10); return {text:`${a} - ${b}`, answer:a-b, op:'sub'}; }
+    const total=randInt(5,10), a=randInt(1,total-1); return {text:`${a} + ? = ${total}`, answer:total-a, op:'add'};
+  }
+  if(tier === 4){
+    if(r < 0.5){ const step=[2,5,10][randInt(0,2)]; const start=step*randInt(1,4); return {text:`${start}, ${start+step}, ${start+2*step}, ?`, answer:start+3*step, op:'add'}; }
+    const a=randInt(6,9), b=randInt(6,9); return {text:`${a} + ${b}`, answer:a+b, op:'add'};
+  }
+  const a=randInt(8,15), b=randInt(1,8), c=randInt(1,a+b-1);
+  return { text:`${a} + ${b} - ${c}`, answer:a+b-c, op:'sub' };
+}
+
+function genBeau(tier){
+  const r = Math.random();
+  if(tier <= 1){
+    if(r < 0.5){ const a=randInt(10,80), b=randInt(1,19); return {text:`${a} + ${b}`, answer:a+b, op:'add'}; }
+    const a=randInt(20,90), b=randInt(1,19); return {text:`${a} - ${b}`, answer:a-b, op:'sub'};
+  }
+  if(tier === 2){
+    if(r < 0.5){ const a=randInt(15,68), b=randInt(15,32); return {text:`${a} + ${b}`, answer:a+b, op:'add'}; }
+    const a=randInt(40,99), b=randInt(15,38); return {text:`${a} - ${b}`, answer:a-b, op:'sub'};
+  }
+  if(tier === 3){
+    const a=randInt(2,5), b=randInt(2,5); return {text:`${a} × ${b}`, answer:a*b, op:'mul'};
+  }
+  if(tier === 4){
+    const a=randInt(2,12), b=randInt(2,12); return {text:`${a} × ${b}`, answer:a*b, op:'mul'};
+  }
+  const b=randInt(2,12), ans=randInt(2,12), a=b*ans;
+  return { text:`${a} ÷ ${b}`, answer:ans, op:'div' };
+}
+
+function genProblem(player, tier){
+  return player === 'beau' ? genBeau(tier) : genRhys(tier);
+}
+
+/* ---------- State ---------- */
+let state = {
+  player: null,
+  mode: 'practice', // 'practice' | 'boss'
+  tier: 1,
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  streak: 0,
+  maxStreak: 0,
+  lives: START_LIVES,
+  timeLeft: ROUND_SECONDS,
+  current: null,
+  input: '',
+  ore: { wood:0, stone:0, iron:0, diamond:0 },
+  timerHandle: null,
+  bossIndex: 0,
+  bossCorrect: 0
+};
+
+/* ---------- Storage helpers ---------- */
+function freshPlayerData(key){
+  return { name:key, totalXP:0, bestScore:0, ore:{wood:0,stone:0,iron:0,diamond:0}, runs:[],
+    currentArc:1, arcsCleared:[], teachBack:{} };
+}
+async function loadPlayerData(key){
+  try{
+    const res = await window.storage.get(key, true);
+    if(res && res.value){
+      const d = JSON.parse(res.value);
+      if(!d.currentArc) d.currentArc = 1;
+      if(!d.arcsCleared) d.arcsCleared = [];
+      if(!d.teachBack) d.teachBack = {};
+      return d;
+    }
+  }catch(e){ /* no record yet */ }
+  return freshPlayerData(key);
+}
+async function savePlayerData(key, data){
+  try{
+    await window.storage.set(key, JSON.stringify(data), true);
+    return true;
+  }catch(e){ console.error('Save failed', e); return false; }
+}
+
+/* ---------- Screen management ---------- */
+let currentPlayerData = null;
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showSelect(){ show('screen-select'); }
+
+async function startPlayer(p){
+  state.player = p;
+  currentPlayerData = await loadPlayerData('player-' + p);
+  await savePlayerData('player-' + p, currentPlayerData);
+  showMap();
+}
+
+/* ---------- Arc Map ---------- */
+function showMap(){
+  const meta = PLAYERS[state.player];
+  const arc = currentPlayerData.currentArc;
+  document.getElementById('map-player-name').textContent = meta.label;
+  document.getElementById('map-arc-num').textContent = 'ARC ' + arc + ' OF 5';
+  document.getElementById('map-arc-name').textContent = ARC_NAMES[arc-1];
+  const titleIdx = Math.min(currentPlayerData.arcsCleared.length, TITLES.length-1);
+  document.getElementById('map-title').textContent = TITLES[titleIdx];
+
+  const list = document.getElementById('arc-list');
+  list.innerHTML = '';
+  for(let i=1;i<=5;i++){
+    const li = document.createElement('li');
+    const cleared = currentPlayerData.arcsCleared.includes(i);
+    li.className = cleared ? 'cleared' : (i === arc ? 'current' : '');
+    li.innerHTML = `<span class="arc-dot"></span> ${ARC_NAMES[i-1]}${cleared ? ' — cleared' : (i===arc ? ' — in progress' : '')}`;
+    list.appendChild(li);
+  }
+
+  const gate = document.getElementById('teachback-gate');
+  const taught = !!currentPlayerData.teachBack[arc];
+  if(taught){
+    gate.innerHTML = `<button class="primary-btn boss" onclick="startBoss()">⚔ Boss Battle</button>`;
+  } else {
+    gate.innerHTML = `<button class="secondary-btn" onclick="goTeachBack()">Unlock Boss Battle — teach it back</button>`;
+  }
+  show('screen-map');
+}
+
+function goTeachBack(){
+  document.getElementById('teachback-arc-name').textContent = ARC_NAMES[currentPlayerData.currentArc-1];
+  show('screen-teachback');
+}
+async function confirmTeachBack(){
+  currentPlayerData.teachBack[currentPlayerData.currentArc] = true;
+  await savePlayerData('player-' + state.player, currentPlayerData);
+  showMap();
+}
+
+/* ---------- Countdown ---------- */
+function runCountdown(){
+  let n = 3;
+  const label = document.getElementById('countdown-label');
+  const num = document.getElementById('countdown-num');
+  label.textContent = state.mode === 'boss' ? 'BOSS BATTLE' : 'GET READY';
+  num.textContent = n;
+  const iv = setInterval(() => {
+    n -= 1;
+    if(n === 0){ num.textContent = 'GO'; }
+    else if(n < 0){ clearInterval(iv); state.mode === 'boss' ? beginBoss() : beginPractice(); }
+    else { num.textContent = n; }
+  }, 700);
+}
+
+function startPractice(){
+  state.mode = 'practice';
+  state.tier = currentPlayerData.currentArc;
+  show('screen-countdown');
+  runCountdown();
+}
+function startBoss(){
+  state.mode = 'boss';
+  state.tier = currentPlayerData.currentArc;
+  show('screen-countdown');
+  runCountdown();
+}
+
+/* ---------- Practice round ---------- */
+function beginPractice(){
+  state.score = 0; state.correct = 0; state.wrong = 0;
+  state.streak = 0; state.maxStreak = 0;
+  state.lives = START_LIVES; state.timeLeft = ROUND_SECONDS;
+  state.ore = { wood:0, stone:0, iron:0, diamond:0 };
+  document.getElementById('boss-banner').style.display = 'none';
+  document.getElementById('timer').style.display = '';
+  document.getElementById('progress-label').style.display = 'none';
+  document.getElementById('boost-track').style.display = '';
+  document.getElementById('lives').style.display = 'flex';
+  renderLives();
+  updateBoost();
+  show('screen-play');
+  nextQuestion();
+  state.timerHandle = setInterval(tick, 1000);
+  document.getElementById('timer').textContent = state.timeLeft;
+}
+
+function tick(){
+  state.timeLeft -= 1;
+  const t = document.getElementById('timer');
+  t.textContent = state.timeLeft;
+  t.classList.toggle('low', state.timeLeft <= 10);
+  if(state.timeLeft <= 0) endPractice('time');
+}
+
+/* ---------- Boss round ---------- */
+function beginBoss(){
+  state.bossIndex = 0; state.bossCorrect = 0;
+  state.correct = 0; state.wrong = 0; state.score = 0;
+  state.ore = { wood:0, stone:0, iron:0, diamond:0 };
+  document.getElementById('boss-banner').style.display = '';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('progress-label').style.display = '';
+  document.getElementById('boost-track').style.display = 'none';
+  document.getElementById('lives').style.display = 'none';
+  updateBossProgress();
+  show('screen-play');
+  nextQuestion();
+}
+function updateBossProgress(){
+  document.getElementById('progress-label').textContent = `Question ${state.bossIndex+1} / ${BOSS_QUESTION_COUNT}`;
+}
+
+/* ---------- Shared question flow ---------- */
+function renderLives(){
+  const el = document.getElementById('lives');
+  el.innerHTML = '';
+  for(let i=0;i<START_LIVES;i++){
+    const d = document.createElement('div');
+    d.className = 'life-dot' + (i >= state.lives ? ' spent' : '');
+    el.appendChild(d);
+  }
+}
+function updateBoost(){
+  const pct = Math.min(100, (state.streak % 5) * 20);
+  document.getElementById('boost-fill').style.width = pct + '%';
+}
+function nextQuestion(){
+  state.current = genProblem(state.player, state.tier);
+  state.input = '';
+  document.getElementById('question-text').textContent = state.current.text;
+  document.getElementById('answer-display').innerHTML = '&nbsp;';
+  buildKeypad();
+}
+function buildKeypad(){
+  const kp = document.getElementById('keypad');
+  kp.innerHTML = '';
+  const layout = ['1','2','3','4','5','6','7','8','9','clear','0','submit'];
+  layout.forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'key' + (k==='submit' ? ' submit' : '') + (k==='clear' ? ' clear' : '');
+    btn.textContent = k==='clear' ? '⌫' : (k==='submit' ? '↵' : k);
+    btn.onclick = () => handleKey(k);
+    kp.appendChild(btn);
+  });
+}
+function handleKey(k){
+  if(k === 'clear'){ state.input = state.input.slice(0,-1); }
+  else if(k === 'submit'){ submitAnswer(); return; }
+  else { if(state.input.length < 4) state.input += k; }
+  document.getElementById('answer-display').textContent = state.input || '\u00A0';
+}
+function flash(kind){
+  const f = document.getElementById('flash');
+  f.className = 'feedback-flash ' + kind;
+  setTimeout(() => f.className = 'feedback-flash', 200);
+}
+
+function submitAnswer(){
+  if(state.input === '') return;
+  const val = parseInt(state.input, 10);
+  const correct = val === state.current.answer;
+
+  if(state.mode === 'boss'){
+    if(correct){ state.bossCorrect += 1; state.correct += 1; flash('correct');
+      const oreKey = state.current.op === 'add' ? 'wood' : state.current.op === 'sub' ? 'stone' : state.current.op === 'mul' ? 'iron' : 'diamond';
+      state.ore[oreKey] += 1;
+    } else { state.wrong += 1; flash('wrong'); }
+    state.bossIndex += 1;
+    if(state.bossIndex >= BOSS_QUESTION_COUNT){ endBoss(); return; }
+    updateBossProgress();
+    nextQuestion();
+    return;
+  }
+
+  // practice mode
+  if(correct){
+    state.correct += 1;
+    state.streak += 1;
+    state.maxStreak = Math.max(state.maxStreak, state.streak);
+    const boostBonus = state.streak > 0 && state.streak % 5 === 0 ? 2 : 1;
+    state.score += 10 * state.tier * boostBonus;
+    const oreKey = state.current.op === 'add' ? 'wood' : state.current.op === 'sub' ? 'stone' : state.current.op === 'mul' ? 'iron' : 'diamond';
+    state.ore[oreKey] += 1;
+    flash('correct');
+  } else {
+    state.wrong += 1;
+    state.streak = 0;
+    state.lives -= 1;
+    flash('wrong');
+    renderLives();
+  }
+  updateBoost();
+  if(state.lives <= 0){ endPractice('eliminated'); return; }
+  nextQuestion();
+}
+
+/* ---------- Round endings ---------- */
+async function endPractice(reason){
+  clearInterval(state.timerHandle);
+  const key = 'player-' + state.player;
+  const data = currentPlayerData;
+  const isNewBest = state.score > (data.bestScore || 0);
+  data.bestScore = Math.max(data.bestScore || 0, state.score);
+  data.totalXP = (data.totalXP || 0) + state.score;
+  Object.keys(state.ore).forEach(k => data.ore[k] = (data.ore[k]||0) + state.ore[k]);
+  data.runs = data.runs || [];
+  data.runs.unshift({ date: new Date().toISOString(), mode:'practice', score: state.score, correct: state.correct, wrong: state.wrong, maxStreak: state.maxStreak, reason });
+  data.runs = data.runs.slice(0, 10);
+  await savePlayerData(key, data);
+
+  document.getElementById('summary-title').textContent = reason === 'eliminated' ? 'Eliminated!' : "Time's Up";
+  document.getElementById('summary-sub').textContent = isNewBest ? 'New personal best!' : 'Nice run.';
+  document.getElementById('s-score').textContent = state.score;
+  document.getElementById('s-correct').textContent = state.correct + ' / ' + (state.correct + state.wrong);
+  document.getElementById('s-streak').textContent = state.maxStreak;
+  document.getElementById('s-best').textContent = data.bestScore;
+  renderOreRow();
+  show('screen-summary');
+}
+
+async function endBoss(){
+  const key = 'player-' + state.player;
+  const data = currentPlayerData;
+  const passed = state.bossCorrect >= BOSS_PASS_THRESHOLD;
+  const arc = data.currentArc;
+
+  Object.keys(state.ore).forEach(k => data.ore[k] = (data.ore[k]||0) + state.ore[k]);
+  data.runs = data.runs || [];
+  data.runs.unshift({ date: new Date().toISOString(), mode:'boss', arc, correct: state.bossCorrect, of: BOSS_QUESTION_COUNT, passed });
+  data.runs = data.runs.slice(0, 10);
+
+  if(passed){
+    if(!data.arcsCleared.includes(arc)) data.arcsCleared.push(arc);
+    data.currentArc = Math.min(arc + 1, 5);
+    data.teachBack[data.currentArc] = false;
+  }
+  await savePlayerData(key, data);
+
+  document.getElementById('summary-title').textContent = passed ? 'Arc Cleared!' : 'Not Yet';
+  document.getElementById('summary-sub').textContent = passed
+    ? `${ARC_NAMES[arc-1]} is done. On to ${ARC_NAMES[data.currentArc-1]}.`
+    : `${state.bossCorrect}/${BOSS_QUESTION_COUNT} — needed ${BOSS_PASS_THRESHOLD}. Back to practice, try the boss again anytime.`;
+  document.getElementById('s-score').textContent = state.bossCorrect + '/' + BOSS_QUESTION_COUNT;
+  document.getElementById('s-correct').textContent = state.correct + ' / ' + BOSS_QUESTION_COUNT;
+  document.getElementById('s-streak').textContent = '—';
+  document.getElementById('s-best').textContent = data.bestScore || 0;
+  renderOreRow();
+  show('screen-summary');
+}
+
+function renderOreRow(){
+  const oreRow = document.getElementById('ore-row');
+  oreRow.innerHTML = '';
+  Object.entries(state.ore).forEach(([k,v]) => {
+    if(v > 0){
+      const chip = document.createElement('div');
+      chip.className = 'ore-chip';
+      chip.innerHTML = `${ORE_META[k].icon} ${v} ${ORE_META[k].label}`;
+      oreRow.appendChild(chip);
+    }
+  });
+}
+
+function playAgain(){
+  show('screen-countdown');
+  runCountdown();
+}
+
+/* ---------- Leaderboard ---------- */
+async function showLeaderboard(){
+  show('screen-leaderboard');
+  const content = document.getElementById('lb-content');
+  content.innerHTML = '<div class="loading-line">Loading scores…</div>';
+  const [beau, rhys] = await Promise.all([loadPlayerData('player-beau'), loadPlayerData('player-rhys')]);
+  content.innerHTML = '';
+  [['beau', beau], ['rhys', rhys]].forEach(([key, data]) => {
+    const meta = PLAYERS[key];
+    const baseLevel = Math.floor((data.totalXP || 0) / BASE_LEVEL_XP);
+    const baseProgress = ((data.totalXP || 0) % BASE_LEVEL_XP) / BASE_LEVEL_XP * 100;
+    const lastRun = (data.runs && data.runs[0]) ? new Date(data.runs[0].date).toLocaleDateString() : '—';
+    const card = document.createElement('div');
+    card.className = 'lb-card ' + meta.class;
+    card.innerHTML = `
+      <div class="lb-name">${meta.label} — ${TITLES[Math.min(data.arcsCleared.length, TITLES.length-1)]}</div>
+      <div class="lb-stats">
+        <div class="lb-stat"><span class="n">${data.arcsCleared.length}/5</span><span class="l">Arcs cleared</span></div>
+        <div class="lb-stat"><span class="n">${data.bestScore || 0}</span><span class="l">Best score</span></div>
+        <div class="lb-stat"><span class="n">Lv ${baseLevel}</span><span class="l">Base level</span></div>
+      </div>
+      <div class="base-bar"><div class="base-fill" style="width:${baseProgress}%"></div></div>
+      <div class="sub" style="margin:10px 0 0; font-size:11px;">Last played: ${lastRun}</div>
+    `;
+    content.appendChild(card);
+  });
+}
+</script>
+</body>
+</html>
