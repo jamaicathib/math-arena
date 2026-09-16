@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Math Arena</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Cormorant+Garamond:wght@600;700&family=Josefin+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#14120F;
@@ -13,33 +13,36 @@
     --panel-line:#332C24;
     --bone:#EDE7DD;
     --bone-dim:#A79E8F;
-    --oxblood:#8C2C36;
-    --oxblood-bright:#C4444F;
-    --sage:#8A9A79;
-    --sage-bright:#A9BC96;
-    --gold:#C9A24B;
-    --danger:#C4444F;
+    --oxblood:#5B1F1B;
+    --oxblood-bright:#A83B36;
+    --sage:#7C8B6F;
+    --sage-bright:#9CAE86;
+    --gold:#B08A3E;
+    --gold-bright:#D9B36A;
+    --danger:#A83B36;
     --radius:10px;
   }
   *{box-sizing:border-box;}
   body{
     margin:0;
-    background:var(--bg);
-    color:var(--bone);
-    font-family:'Inter',sans-serif;
     min-height:100vh;
     display:flex;
     align-items:center;
     justify-content:center;
     padding:20px;
+    color:var(--bone);
+    font-family:'Josefin Sans',sans-serif;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 6px),
+      radial-gradient(ellipse at 50% 15%, #1c1812 0%, #0d0b08 72%);
   }
   .cabinet{
     width:100%;
     max-width:440px;
     background:var(--panel);
     border:1px solid var(--panel-line);
-    border-radius:16px;
-    padding:24px 20px;
+    border-radius:14px;
+    padding:26px 22px;
     position:relative;
     overflow:hidden;
   }
@@ -48,85 +51,87 @@
     position:absolute;
     top:0;left:0;right:0;
     height:3px;
-    background:linear-gradient(90deg, var(--oxblood), var(--sage), var(--gold));
+    background:linear-gradient(90deg, var(--oxblood-bright), var(--sage-bright), var(--gold-bright));
   }
+  .corner{ position:absolute; width:14px; height:14px; border-color:var(--gold); opacity:0.55; pointer-events:none; }
+  .corner-tl{ top:12px; left:12px; border-top:2px solid; border-left:2px solid; }
+  .corner-tr{ top:12px; right:12px; border-top:2px solid; border-right:2px solid; }
+  .corner-bl{ bottom:12px; left:12px; border-bottom:2px solid; border-left:2px solid; }
+  .corner-br{ bottom:12px; right:12px; border-bottom:2px solid; border-right:2px solid; }
+
   h1{
-    font-family:'Rajdhani',sans-serif;
+    font-family:'Cormorant Garamond',serif;
     font-weight:700;
-    font-size:28px;
-    letter-spacing:0.5px;
-    margin:4px 0 2px;
+    font-size:32px;
+    letter-spacing:0.2px;
+    margin:6px 0 2px;
   }
-  .sub{
-    color:var(--bone-dim);
-    font-size:13px;
-    margin-bottom:22px;
-    line-height:1.5;
-  }
+  .sub{color:var(--bone-dim); font-size:13px; margin-bottom:22px; line-height:1.55;}
   .screen{display:none;}
   .screen.active{display:block;}
 
   .player-grid{display:flex; gap:12px; margin-top:16px;}
   .player-card{
-    flex:1;
-    background:#25201A;
-    border:1px solid var(--panel-line);
-    border-radius:var(--radius);
-    padding:18px 14px;
-    text-align:left;
-    cursor:pointer;
-    transition:border-color .15s ease, transform .1s ease;
-    font-family:inherit;
-    color:var(--bone);
+    flex:1; background:#25201A; border:1px solid var(--panel-line); border-radius:var(--radius);
+    padding:18px 14px; text-align:left; cursor:pointer;
+    transition:border-color .15s ease, transform .1s ease; font-family:inherit; color:var(--bone);
   }
   .player-card:active{transform:scale(0.97);}
   .player-card.beau{border-left:3px solid var(--oxblood-bright);}
   .player-card.rhys{border-left:3px solid var(--sage-bright);}
-  .player-card .name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px;}
+  .player-card .name{font-family:'Cormorant Garamond',serif; font-weight:700; font-size:22px;}
   .player-card .meta{font-size:12px; color:var(--bone-dim); margin-top:6px;}
 
   .link-row{margin-top:20px; text-align:center;}
-  .link-btn{background:none; border:none; color:var(--bone-dim); font-size:13px; text-decoration:underline; cursor:pointer; font-family:'Inter',sans-serif;}
+  .link-btn{background:none; border:none; color:var(--bone-dim); font-size:13px; text-decoration:underline; cursor:pointer; font-family:'Josefin Sans',sans-serif;}
 
-  .countdown-num{font-family:'Rajdhani',sans-serif; font-size:96px; font-weight:700; text-align:center; color:var(--gold); padding:40px 0;}
+  .countdown-num{font-family:'Rajdhani',sans-serif; font-size:96px; font-weight:700; text-align:center; color:var(--gold-bright); padding:40px 0;}
 
   .hud{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; font-family:'Rajdhani',sans-serif;}
   .hud .timer{font-size:30px; font-weight:700;}
   .hud .timer.low{color:var(--danger);}
-  .hud .progress-label{font-size:18px; font-weight:700; color:var(--gold);}
+  .hud .progress-label{font-size:18px; font-weight:700; color:var(--gold-bright);}
   .lives{display:flex; gap:5px;}
   .life-dot{width:12px; height:12px; border-radius:50%; background:var(--oxblood-bright);}
   .life-dot.spent{background:#3A322A;}
 
   .boost-track{height:6px; background:#3A322A; border-radius:3px; margin-bottom:20px; overflow:hidden;}
-  .boost-fill{height:100%; background:linear-gradient(90deg, var(--sage), var(--gold)); width:0%; transition:width .25s ease;}
+  .boost-fill{height:100%; background:linear-gradient(90deg, var(--sage-bright), var(--gold-bright)); width:0%; transition:width .25s ease;}
 
-  .question-box{background:#25201A; border-radius:var(--radius); padding:32px 16px; text-align:center; margin-bottom:18px;}
+  .question-box{
+    background:#25201A; border-radius:var(--radius); padding:32px 16px; text-align:center; margin-bottom:18px;
+    border:1px solid transparent;
+  }
   .question-text{font-family:'Rajdhani',sans-serif; font-size:44px; font-weight:700; letter-spacing:1px;}
-  .answer-display{min-height:28px; font-family:'Rajdhani',sans-serif; font-size:22px; color:var(--gold); margin-top:10px; letter-spacing:2px;}
+  .answer-display{min-height:28px; font-family:'Rajdhani',sans-serif; font-size:22px; color:var(--gold-bright); margin-top:10px; letter-spacing:2px;}
+  @keyframes popCorrect{ 0%{transform:scale(1);} 45%{transform:scale(1.045);} 100%{transform:scale(1);} }
+  @keyframes shakeWrong{ 0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);} }
+  .question-box.pop-correct{ animation:popCorrect .28s ease; border-color:var(--sage-bright); }
+  .question-box.pop-wrong{ animation:shakeWrong .32s ease; border-color:var(--oxblood-bright); }
 
   .keypad{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;}
   .key{background:#25201A; border:1px solid var(--panel-line); color:var(--bone); font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:600; padding:16px 0; border-radius:8px; cursor:pointer;}
   .key:active{background:#332C24;}
-  .key.submit{background:var(--sage); color:#14120F; border:none;}
+  .key.submit{background:var(--sage-bright); color:#14120F; border:none;}
   .key.clear{background:transparent; color:var(--bone-dim);}
 
   .feedback-flash{position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity .12s ease;}
-  .feedback-flash.correct{background:rgba(138,154,121,0.18); opacity:1;}
-  .feedback-flash.wrong{background:rgba(196,68,79,0.2); opacity:1;}
+  .feedback-flash.correct{background:rgba(154,174,134,0.16); opacity:1;}
+  .feedback-flash.wrong{background:rgba(168,59,54,0.18); opacity:1;}
 
   .summary-stat-row{display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--panel-line); font-size:14px;}
-  .summary-stat-row .val{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; color:var(--gold);}
-  .ore-row{display:flex; gap:14px; margin-top:16px; flex-wrap:wrap;}
-  .ore-chip{background:#25201A; border-radius:8px; padding:8px 12px; font-size:13px; display:flex; align-items:center; gap:6px;}
+  .summary-stat-row .val{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px; color:var(--gold-bright);}
+  .ore-row{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .ore-chip{background:#25201A; border-radius:8px; padding:7px 12px; font-size:13px; display:flex; align-items:center; gap:7px;}
+  .ore-chip svg{width:14px; height:14px; flex-shrink:0;}
 
-  .primary-btn{width:100%; background:var(--oxblood); color:var(--bone); border:none; border-radius:8px; padding:14px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; margin-top:18px; cursor:pointer;}
+  .primary-btn{width:100%; background:var(--oxblood); color:var(--bone); border:none; border-radius:8px; padding:14px; font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; margin-top:18px; cursor:pointer; letter-spacing:0.3px;}
   .primary-btn.boss{background:var(--gold); color:#14120F;}
   .primary-btn:disabled{background:#3A322A; color:var(--bone-dim); cursor:default;}
-  .secondary-btn{width:100%; background:none; border:1px solid var(--panel-line); color:var(--bone-dim); border-radius:8px; padding:12px; font-family:'Inter',sans-serif; font-size:14px; margin-top:10px; cursor:pointer;}
+  .secondary-btn{width:100%; background:none; border:1px solid var(--panel-line); color:var(--bone-dim); border-radius:8px; padding:12px; font-family:'Josefin Sans',sans-serif; font-size:14px; margin-top:10px; cursor:pointer;}
 
   .lb-card{background:#25201A; border-radius:var(--radius); padding:16px; margin-bottom:12px;}
-  .lb-card .lb-name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:18px;}
+  .lb-card .lb-name{font-family:'Cormorant Garamond',serif; font-weight:700; font-size:20px;}
   .lb-card.beau{border-left:3px solid var(--oxblood-bright);}
   .lb-card.rhys{border-left:3px solid var(--sage-bright);}
   .lb-stats{display:flex; justify-content:space-between; margin-top:10px;}
@@ -134,36 +139,43 @@
   .lb-stat .n{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px; display:block;}
   .lb-stat .l{font-size:11px; color:var(--bone-dim);}
   .base-bar{height:8px; background:#3A322A; border-radius:4px; margin-top:10px; overflow:hidden;}
-  .base-fill{height:100%; background:var(--gold);}
+  .base-fill{height:100%; background:var(--gold-bright);}
 
   .loading-line{color:var(--bone-dim); font-size:13px; text-align:center; padding:20px 0;}
 
-  /* Map screen */
-  .arc-header{background:#25201A; border-radius:var(--radius); padding:16px; margin-bottom:16px;}
-  .arc-header .arc-num{font-size:11px; color:var(--bone-dim);}
-  .arc-header .arc-name{font-family:'Rajdhani',sans-serif; font-weight:700; font-size:20px; margin-top:2px;}
-  .arc-header .arc-title{font-size:12px; color:var(--gold); margin-top:4px;}
+  .arc-header{background:#25201A; border-radius:var(--radius); padding:16px; margin-bottom:18px;}
+  .arc-header .arc-num{font-size:11px; color:var(--bone-dim); font-family:'Josefin Sans',sans-serif; letter-spacing:0.4px;}
+  .arc-header .arc-name{font-family:'Cormorant Garamond',serif; font-weight:700; font-size:22px; margin-top:3px; font-style:italic;}
+  .arc-header .arc-title{font-size:12px; color:var(--gold-bright); margin-top:4px;}
 
-  .arc-list{list-style:none; padding:0; margin:0 0 16px;}
+  .arc-list{list-style:none; margin:0 0 16px; padding-left:20px; position:relative;}
+  .arc-list::before{content:""; position:absolute; left:6px; top:8px; bottom:8px; width:1px; background:var(--panel-line);}
   .arc-list li{
-    display:flex; align-items:center; gap:10px;
-    padding:10px 4px; border-bottom:1px solid var(--panel-line);
-    font-size:13px; color:var(--bone-dim);
+    position:relative; padding:9px 0 9px 14px; font-size:13px; color:var(--bone-dim);
   }
-  .arc-list li.current{color:var(--bone); font-weight:600;}
+  .arc-list li.current{color:var(--bone); font-weight:500;}
   .arc-list li.cleared{color:var(--sage-bright);}
-  .arc-dot{width:8px; height:8px; border-radius:50%; background:#3A322A; flex-shrink:0;}
+  .arc-dot{position:absolute; left:-20px; top:15px; width:8px; height:8px; border-radius:50%; background:#3A322A; z-index:1;}
   .arc-list li.cleared .arc-dot{background:var(--sage-bright);}
-  .arc-list li.current .arc-dot{background:var(--gold);}
+  .arc-list li.current .arc-dot{background:var(--gold-bright);}
 
-  .teachback-box{background:#25201A; border-radius:var(--radius); padding:20px; text-align:center; margin:20px 0;}
-  .teachback-box .big-icon{font-size:36px; margin-bottom:8px;}
-  .boss-banner{background:linear-gradient(90deg, rgba(140,44,54,0.25), rgba(201,162,75,0.15)); border:1px solid var(--gold); border-radius:var(--radius); padding:16px; text-align:center; margin-bottom:16px;}
+  .teachback-box{background:#25201A; border-radius:var(--radius); padding:22px; text-align:center; margin:20px 0;}
+  .teachback-box .big-icon{font-size:32px; margin-bottom:10px;}
+  #teachback-arc-name{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:19px; color:var(--gold-bright);}
+  .boss-banner{
+    font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:0.3px;
+    background:linear-gradient(90deg, rgba(91,31,27,0.35), rgba(176,138,62,0.18));
+    border:1px solid var(--gold); border-radius:var(--radius); padding:14px; text-align:center; margin-bottom:16px;
+  }
 </style>
 </head>
 <body>
 
 <div class="cabinet">
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
   <div class="feedback-flash" id="flash"></div>
 
   <!-- PLAYER SELECT -->
@@ -231,7 +243,7 @@
       <div class="lives" id="lives"></div>
     </div>
     <div class="boost-track" id="boost-track"><div class="boost-fill" id="boost-fill"></div></div>
-    <div class="question-box">
+    <div class="question-box" id="question-box">
       <div class="question-text" id="question-text">--</div>
       <div class="answer-display" id="answer-display">&nbsp;</div>
     </div>
@@ -268,10 +280,10 @@ const PLAYERS = {
   rhys: { label: 'Rhys', tier: '1st grade', class: 'rhys' }
 };
 const ORE_META = {
-  wood:    { label: 'Wood',    icon: '🪵' },
-  stone:   { label: 'Stone',   icon: '⛏️' },
-  iron:    { label: 'Iron',    icon: '🔩' },
-  diamond: { label: 'Diamond', icon: '💎' }
+  wood:    { label: 'Wood',    color:'#B08A3E', svg:'<svg viewBox="0 0 16 16"><rect x="2" y="5.5" width="12" height="5" rx="1.5" fill="currentColor"/></svg>' },
+  stone:   { label: 'Stone',   color:'#A79E8F', svg:'<svg viewBox="0 0 16 16"><polygon points="8,1 14,5 14,11 8,15 2,11 2,5" fill="currentColor"/></svg>' },
+  iron:    { label: 'Iron',    color:'#C9C2B4', svg:'<svg viewBox="0 0 16 16"><polygon points="3,10 5,4 11,4 13,10 10,13 6,13" fill="currentColor"/></svg>' },
+  diamond: { label: 'Diamond', color:'#9CAE86', svg:'<svg viewBox="0 0 16 16"><polygon points="8,1 13,6 8,15 3,6" fill="currentColor"/></svg>' }
 };
 const ROUND_SECONDS = 60;
 const START_LIVES = 3;
@@ -280,7 +292,6 @@ const BOSS_QUESTION_COUNT = 10;
 const BOSS_PASS_THRESHOLD = 8;
 
 // TODO — replace these once the boys name their world and each Arc.
-// One entry per Arc (1 through 5).
 const ARC_NAMES = [
   'Arc I — name it',
   'Arc II — name it',
@@ -342,7 +353,7 @@ function genProblem(player, tier){
 /* ---------- State ---------- */
 let state = {
   player: null,
-  mode: 'practice', // 'practice' | 'boss'
+  mode: 'practice',
   tier: 1,
   score: 0,
   correct: 0,
@@ -555,7 +566,14 @@ function handleKey(k){
 function flash(kind){
   const f = document.getElementById('flash');
   f.className = 'feedback-flash ' + kind;
-  setTimeout(() => f.className = 'feedback-flash', 200);
+  const qbox = document.getElementById('question-box');
+  qbox.classList.remove('pop-correct','pop-wrong');
+  void qbox.offsetWidth;
+  qbox.classList.add(kind === 'correct' ? 'pop-correct' : 'pop-wrong');
+  setTimeout(() => {
+    f.className = 'feedback-flash';
+    qbox.classList.remove('pop-correct','pop-wrong');
+  }, 300);
 }
 
 function submitAnswer(){
@@ -575,7 +593,6 @@ function submitAnswer(){
     return;
   }
 
-  // practice mode
   if(correct){
     state.correct += 1;
     state.streak += 1;
@@ -656,9 +673,11 @@ function renderOreRow(){
   oreRow.innerHTML = '';
   Object.entries(state.ore).forEach(([k,v]) => {
     if(v > 0){
+      const meta = ORE_META[k];
       const chip = document.createElement('div');
       chip.className = 'ore-chip';
-      chip.innerHTML = `${ORE_META[k].icon} ${v} ${ORE_META[k].label}`;
+      chip.style.color = meta.color;
+      chip.innerHTML = `${meta.svg}<span style="color:var(--bone);">${v} ${meta.label}</span>`;
       oreRow.appendChild(chip);
     }
   });
